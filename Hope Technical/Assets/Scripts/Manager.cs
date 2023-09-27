@@ -10,6 +10,10 @@ public class Manager : MonoBehaviour
     int[] currentChoices;
     List<int> allChoices;
 
+    public GameObject choiceContainer;
+    public Object numberButtonPrefab;
+    List<NumberButton> numberButtons = new List<NumberButton>();
+
     // Start is called before the first frame update
     void Start()
     {
@@ -20,6 +24,15 @@ public class Manager : MonoBehaviour
         {
             allChoices.Add(i);
         }
+
+        for (int i = 0; i < numChoices; i++)
+        {
+            GameObject button = Instantiate(numberButtonPrefab, choiceContainer.transform) as GameObject;
+
+            numberButtons.Add(button.GetComponent<NumberButton>());
+        }
+
+        GenerateNumber();
     }
 
     [ContextMenu("Generate number")]
@@ -29,12 +42,20 @@ public class Manager : MonoBehaviour
 
         //Generate a set of random numbers that will not include dupicates
         allChoices.Sort((a, b) => 1 - 2 * Random.Range(0, allChoices.Count));
+        
+        GenerateChoices();
 
+        //TODO:Spawn number in world
+    }
+
+    private void GenerateChoices()
+    {
         bool alreadyContains = false;
 
         for (int i = 0; i < numChoices; i++)
         {
             currentChoices[i] = allChoices[i];
+            numberButtons[i].SetNumber(currentChoices[i]);
             if (currentChoices[i] == currentNumber)
                 alreadyContains = true;
         }
@@ -43,8 +64,7 @@ public class Manager : MonoBehaviour
         {
             int choiceIndex = Random.Range(0, numChoices);
             currentChoices[choiceIndex] = currentNumber;
+            numberButtons[choiceIndex].SetNumber(currentNumber);
         }
-
-        //TODO:Spawn number in world
     }
 }
