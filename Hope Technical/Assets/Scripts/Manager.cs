@@ -21,6 +21,8 @@ public class Manager : MonoBehaviour
     public string correctMessage, incorrectMessage;
     public float messageDuration = 5f;
 
+    private ARObjectManager arManager;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -28,6 +30,8 @@ public class Manager : MonoBehaviour
             instance = this;
         else
             Destroy(this.gameObject);
+
+        arManager = GetComponent<ARObjectManager>();
 
         currentChoices = new int[numChoices];
 
@@ -57,7 +61,8 @@ public class Manager : MonoBehaviour
         
         GenerateChoices();
 
-        //TODO:Spawn number in world
+        //Spawn number in world
+        arManager.SetNumber(currentNumber);
     }
 
     private void GenerateChoices()
