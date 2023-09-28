@@ -1,12 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class Manager : MonoBehaviour
 {
+    public static Manager instance;
+
     public Vector2Int numberMinMax;
     public int numChoices;
-    int currentNumber;
+    public int currentNumber;
     int[] currentChoices;
     List<int> allChoices;
 
@@ -14,9 +17,18 @@ public class Manager : MonoBehaviour
     public Object numberButtonPrefab;
     List<NumberButton> numberButtons = new List<NumberButton>();
 
+    public TextMeshProUGUI messageText;
+    public string correctMessage, incorrectMessage;
+    public float messageDuration = 5f;
+
     // Start is called before the first frame update
     void Start()
     {
+        if (instance == null)
+            instance = this;
+        else
+            Destroy(this.gameObject);
+
         currentChoices = new int[numChoices];
 
         allChoices = new List<int>();
@@ -36,7 +48,7 @@ public class Manager : MonoBehaviour
     }
 
     [ContextMenu("Generate number")]
-    public void GenerateNumber()
+    private void GenerateNumber()
     {
         currentNumber = Random.Range(numberMinMax.x, numberMinMax.y + 1);
 
@@ -66,5 +78,23 @@ public class Manager : MonoBehaviour
             currentChoices[choiceIndex] = currentNumber;
             numberButtons[choiceIndex].SetNumber(currentNumber);
         }
+    }
+
+    public void ButtonPressed(bool correct)
+    {
+        if (correct)
+            GenerateNumber();
+
+        //Show text
+        StopAllCoroutines();
+        messageText.enabled = true;
+        messageText.text = correct ? correctMessage : incorrectMessage;
+        StartCoroutine(IResetMessage(messageDuration));
+    }
+
+    IEnumerator IResetMessage(float delay)
+    {
+        yield return new WaitForSecondsRealtime(delay);
+        messageText.enabled = false;
     }
 }
