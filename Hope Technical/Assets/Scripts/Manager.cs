@@ -20,8 +20,10 @@ public class Manager : MonoBehaviour
     public TextMeshProUGUI messageText;
     public string correctMessage, incorrectMessage;
     public float messageDuration = 5f;
+    public AudioClip correctSound, incorrectSound;
 
-    private ARObjectManager arManager;
+    ARObjectManager arManager;
+    AudioSource audioSource;
 
     // Start is called before the first frame update
     void Start()
@@ -32,6 +34,7 @@ public class Manager : MonoBehaviour
             Destroy(this.gameObject);
 
         arManager = GetComponent<ARObjectManager>();
+        audioSource = GetComponent<AudioSource>();
 
         currentChoices = new int[numChoices];
 
@@ -94,6 +97,7 @@ public class Manager : MonoBehaviour
         StopAllCoroutines();
         messageText.enabled = true;
         messageText.text = correct ? correctMessage : incorrectMessage;
+        audioSource.PlayOneShot(correct ? correctSound : incorrectSound);
         StartCoroutine(IResetMessage(messageDuration));
     }
 
