@@ -11,6 +11,7 @@ public class Manager : MonoBehaviour
     public int numChoices;
     public int currentNumber;
     int[] currentChoices;
+    List<int> numbersLeft;
     List<int> allChoices;
 
     public GameObject choiceContainer;
@@ -21,6 +22,8 @@ public class Manager : MonoBehaviour
     public string correctMessage, incorrectMessage;
     public float messageDuration = 5f;
     public AudioClip correctSound, incorrectSound;
+
+    public GameObject endGameObject;
 
     ARObjectManager arManager;
     AudioSource audioSource;
@@ -38,12 +41,6 @@ public class Manager : MonoBehaviour
 
         currentChoices = new int[numChoices];
 
-        allChoices = new List<int>();
-        for (int i = numberMinMax.x; i < numberMinMax.y; i++)
-        {
-            allChoices.Add(i);
-        }
-
         for (int i = 0; i < numChoices; i++)
         {
             GameObject button = Instantiate(numberButtonPrefab, choiceContainer.transform) as GameObject;
@@ -51,13 +48,36 @@ public class Manager : MonoBehaviour
             numberButtons.Add(button.GetComponent<NumberButton>());
         }
 
+        SetupGame();
+    }
+
+    public void SetupGame()
+    {
+        choiceContainer.SetActive(true);
+        endGameObject.SetActive(false);
+
+        allChoices = new List<int>();
+        numbersLeft = new List<int>();
+        for (int i = numberMinMax.x; i <= numberMinMax.y; i++)
+        {
+            allChoices.Add(i);
+            numbersLeft.Add(i);
+        }
+
+        numbersLeft.Sort((a, b) => 1 - 2 * Random.Range(0, allChoices.Count));
+
         GenerateNumber();
     }
 
     [ContextMenu("Generate number")]
     private void GenerateNumber()
     {
-        currentNumber = Random.Range(numberMinMax.x, numberMinMax.y + 1);
+        if (numbersLeft.Count == 0)
+        {
+            GameWon();
+            return;
+        }
+        currentNumber = numbersLeft[0];
 
         //Generate a set of random numbers that will not include dupicates
         allChoices.Sort((a, b) => 1 - 2 * Random.Range(0, allChoices.Count));
@@ -91,7 +111,10 @@ public class Manager : MonoBehaviour
     public void ButtonPressed(bool correct)
     {
         if (correct)
+        {
+            numbersLeft.RemoveAt(0);
             GenerateNumber();
+        }
 
         //Show text
         StopAllCoroutines();
@@ -105,5 +128,11 @@ public class Manager : MonoBehaviour
     {
         yield return new WaitForSecondsRealtime(delay);
         messageText.enabled = false;
+    }
+
+    void GameWon()
+    {
+        choiceContainer.SetActive(false);
+        endGameObject.SetActive(true);
     }
 }
